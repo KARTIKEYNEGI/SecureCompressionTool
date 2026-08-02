@@ -118,6 +118,13 @@ HuffmanNode* build_huffman_tree(const map<uint8_t, int>& freq) {
     }
     return pq.top();
 }
+void free_huffman_tree(HuffmanNode* root) {
+    if (!root) return;
+    free_huffman_tree(root->left);
+    free_huffman_tree(root->right);
+    delete root;
+}
+
 
 string huffman_compress(const vector<uint8_t>& data, map<uint8_t, string>& codes, map<uint8_t, int>& freq) {
     for (uint8_t b : data) {
@@ -129,6 +136,7 @@ string huffman_compress(const vector<uint8_t>& data, map<uint8_t, string>& codes
     for (uint8_t b : data) {
         compressed += codes[b];
     }
+    free_huffman_tree(root);
     return compressed;
 }
 
@@ -286,6 +294,7 @@ void decompress_data(const string& xor_key, const string& originalFilename) {
     if (meta["method"] == "huffman") {
         HuffmanNode* root = build_huffman_tree(freq);
         decompressed = huffman_decompress(compressed_bits, root);
+        free_huffman_tree(root);
     } else if (meta["method"] == "shannon") {
         map<uint8_t, string> codes;
         vector<SFNode> symbols;
